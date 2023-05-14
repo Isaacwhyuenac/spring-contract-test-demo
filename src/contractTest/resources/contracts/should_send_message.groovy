@@ -5,25 +5,26 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
 
     description "should send kafka message"
-    label 'transactionController.sendMessage'
+    label 'triggerTransactionCreatedEvent'
 
     input {
-        triggeredBy 'createBankTransaction()'
+        triggeredBy('createBankTransaction()')
     }
 
     outputMessage {
-        sentTo 'transactionEvents'
+        sentTo('transaction-events')
 
-        headers {
-            header('contentType', 'application/json')
-        }
+//        headers {
+//            messagingContentType(applicationJson())
+//        }
 
         body([
                 amount     : anyNonBlankString(),
-                iban       : anyNonBlankString(),
+                iban       : anyUuid(),
                 description: anyNonBlankString()
         ])
 
 
     }
 }
+
