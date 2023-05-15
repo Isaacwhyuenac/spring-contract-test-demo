@@ -1,5 +1,6 @@
 package com.example.bankservice;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,7 +100,7 @@ public abstract class BaseContractTestsSpec {
   static class KafkaEventVerifier implements MessageVerifierReceiver<Message<?>> {
 
     private final Set<Message> consumedEvents = Collections.synchronizedSet(new HashSet<>());
-    Map<String, BlockingQueue<Message<?>>> broker = new ConcurrentHashMap<>();
+//    Map<String, BlockingQueue<Message<?>>> broker = new ConcurrentHashMap<>();
 
 
     @KafkaListener(id = "transactionEvents",
@@ -107,8 +108,18 @@ public abstract class BaseContractTestsSpec {
 //      topicPattern = ".*",
       groupId = "order-consumer"
     )
-    void transactionEvents(ConsumerRecord payload, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-      consumedEvents.add(MessageBuilder.createMessage(payload.value(), new MessageHeaders(Collections.emptyMap())));
+    void transactionEvents(ConsumerRecord payload) {
+      Map<String, Object> headers = new HashMap<>();
+
+      for (org.apache.kafka.common.header.Header header : payload.headers()) {
+        headers.put(header.key(), new String(header.value(), StandardCharsets.UTF_8));
+      }
+
+      MessageHeaders messageHeaders = new MessageHeaders(headers);
+
+      log.info("============ Payload.value: {} ===============", payload.value());
+
+      consumedEvents.add(MessageBuilder.createMessage(payload.value(), messageHeaders));
 
 //      Map<String, Object> headers = new HashMap<>();
 //      new DefaultKafkaHeaderMapper().toHeaders(payload.headers(), headers);

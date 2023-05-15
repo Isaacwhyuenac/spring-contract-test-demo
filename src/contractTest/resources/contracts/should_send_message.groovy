@@ -14,9 +14,9 @@ Contract.make {
     outputMessage {
         sentTo('transaction-events')
 
-//        headers {
-//            messagingContentType(applicationJson())
-//        }
+        headers {
+            messagingContentType(applicationJson())
+        }
 
         body([
                 amount     : anyNonBlankString(),
